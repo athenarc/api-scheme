@@ -1,13 +1,17 @@
 openapi: 3.0.0
+
+servers:
+  - url: https://mhmd.madgik.di.uoa.gr/api
+    description: Production server
+
 info:
   title: Athena MHMD API
   description: >-
     An API for multi-level privacy preservation techniques.
   version: 0.1.0
-
-servers:
-  - url: https://mhmd.madgik.di.uoa.gr/api
-    description: Production server
+  x-logo:
+    url: 'http://www.myhealthmydata.eu/wp-content/uploads/2016/12/logo_MHMD.png'
+    altText: MHMD
 
 tags:
   - name: Amnesia
