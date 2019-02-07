@@ -10,6 +10,13 @@ servers:
     description: Production server
 
 tags:
+  - name: Amnesia
+    description: >-
+      Amnesia is a data anonymization tool, that allows to remove identifying
+      information from data. mnesia not only removes direct identifiers like
+      names, SSNs etc but also transforms secondary identifiers like birth date
+      and zip code so that individuals cannot be identified in the data. Amnesia
+      supports k-anonymity and k^m-anonymity
   - name: SMPC
     description: 'Secure multi party computation platform'
 paths:
@@ -183,6 +190,107 @@ paths:
         '500':
           $ref: '#/components/responses/Error'
 
+  /amnesia/session:
+    get:
+      tags:
+        - Amnesia
+      summary: Get a session id.
+      security: []
+      responses:
+        '200':
+          description: >
+            The session ID is returned in a cookie named `JSESSIONID`. You need
+            to include this cookie in subsequent requests.
+          headers:
+            Set-Cookie:
+              schema:
+                type: string
+                example: JSESSIONID=abcde12345; Path=/; HttpOnly
+  /amnesia/dataset:
+    post:
+      tags:
+        - Amnesia
+      summary: Upload a dataset.
+      security:
+        - cookieAuth: []
+      requestBody:
+        required: true
+        description: The metadata and the file of the dataset
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Dataset'
+      responses:
+        '200':
+          description: File uploaded successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/Error'
+
+  /amnesia/hierarchy:
+    post:
+      tags:
+        - Amnesia
+      summary: Upload a hierarchy.
+      security:
+        - cookieAuth: []
+      requestBody:
+        description: The hierarchy file
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Hierarchy'
+      responses:
+        '200':
+          description: File uploaded successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/Error'
+  /amnesia/anonymize:
+    post:
+      tags:
+        - Amnesia
+      summary: Executes k or km anonimity.
+      security:
+        - cookieAuth: []
+      requestBody:
+        description: The parameters of the algorithm
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Algorithm'
+      responses:
+        '200':
+          description: A file containing the best anonymized solution based on information loss
+          content:
+            application/csv:
+              schema:
+                type: string
+                format: binary
+
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/Error'
+
 components:
   securitySchemes:
     cookieAuth:
@@ -190,6 +298,12 @@ components:
       in: cookie
       name: JSESSIONID
   responses:
+    Unauthorized:
+        description: Authorization information is missing or invalid.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Error'
     NotFound:
       description: The specified resource was not found
       content:
@@ -209,6 +323,35 @@ components:
           schema:
             $ref: '#/components/schemas/Error'
   schemas:
+    Hierarchy:
+      required:
+        - file
+      properties:
+        file:
+          type: string
+          format: binary
+          description: The file
+    Algorithm:
+        required:
+          - k
+          - m
+          - algo
+          - relations
+        properties:
+          k:
+            type: integer
+            description: the k variable for k-anonymity
+          m:
+            type: integer
+            description: the m variable for km-anonymity
+          algo:
+            type: string
+            description: 'the specific algorithm, ''k-anonymity'' or ''km-anonymity'''
+          relations:
+            type: array
+            description: An array with the name of each hierarchy. (Only the quasi-identifiers. The others identifiers are empty)
+            items:
+              type: string
     HistogramCategorical:
       required:
         - attributes
