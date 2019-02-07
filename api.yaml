@@ -12,6 +12,9 @@ info:
   x-logo:
     url: 'http://www.myhealthmydata.eu/wp-content/uploads/2016/12/logo_MHMD.png'
     altText: MHMD
+  license:
+    name: MIT
+    url: 'https://github.com/Athena-MHMD/api-scheme/blob/master/LICENSE'
 
 tags:
   - name: Amnesia
