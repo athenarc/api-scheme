@@ -1,0 +1,654 @@
+openapi: 3.0.0
+info:
+  title: Athena MHMD API
+  description: >-
+    An API for multi-level privacy preservation techniques.
+  version: 0.1.0
+
+servers:
+  - url: https://mhmd.madgik.di.uoa.gr/api
+    description: Production server
+
+tags:
+  - name: SMPC
+    description: 'Secure multi party computation platform'
+paths:
+  /smpc/import:
+    post:
+      tags:
+      - SMPC
+      summary: Securely import data into the SMPC Platform.
+      description: "Import a specified attribute into the SMPC cluster. This API call is used internally and is not for external used."
+      requestBody:
+        description: The attributes of the data that they will be imported.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Import'
+      responses:
+        '200':
+          description: Data imported successfully.
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/Error'
+  /smpc/histogram/numerical/:
+    post:
+      tags:
+        - SMPC
+      summary: Initiates a secure computation for numerical/continuous values dataset.
+      description: "Through the request's body, one can specify all the desired properties of the histograms to be computed. These include the attributes on which the histogram will be built (names and cell), the datasources from which data will be used, and a set of filters/conditions that should hold for each data tuple taken into consideration when building the histogram."
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/HistogramNumerical"
+      responses:
+        '202':
+          description: Request for smpc computation accepted.
+          headers:
+            Location:
+              schema:
+                type: string
+              description: "Location for status polling."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ComputationAccepted"
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/Error'
+  /smpc/histogram/categorical/:
+    post:
+      tags:
+        - SMPC
+      summary: Initiates a secure computation for categorical values dataset (MeSH).
+      description: "Through the request's body, one can specify the desired MeSH terms. The values of the response are the children of the specified MeSH term from the MeSH ontology."
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/HistogramCategorical"
+      responses:
+        '202':
+          description: Request for smpc computation accepted.
+          headers:
+            Location:
+              schema:
+                type: string
+              description: "Location for status polling."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ComputationAccepted"
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/Error'
+  /smpc/decision_tree/:
+    post:
+      tags:
+        - SMPC
+      summary: Build a decision tree on selected attributes.
+      description: "Train a decision tree classifier on specific test and target attributes."
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Tree"
+      responses:
+        '202':
+          description: Request for smpc computation accepted.
+          headers:
+            Location:
+              schema:
+                type: string
+              description: "Location for status polling."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ComputationAccepted"
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/Error'
+  /smpc/queue/{id}:
+    get:
+      tags:
+        - SMPC
+      summary: "Poll for an ongoing computation status."
+      description: "Check the status of an ongoing computation. Returns its status or the location of the computation's results when the computation is completed."
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+          description: The request id.
+      responses:
+        '200':
+          description: ΟΚ
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StatusResponse"
+
+        '303':
+          description: Computation completed. Redirecting to the resource where the computation's results are provided.
+          headers:
+            Location:
+              schema:
+                type: string
+              description: "Location for computartion results retrieval"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ComputationCompleted"
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/Error'
+
+  /smpc/results/{id}:
+    get:
+      tags:
+        - SMPC
+      summary: "Computation results retrieval"
+      description: "Retrieve the results of a completed computation."
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+          description: The request id.
+      responses:
+        '200':
+          description: ΟΚ
+          content:
+            application/json:
+              schema:
+                oneOf:
+                 - $ref: "#/components/schemas/ComputationResultsCategorical"
+                 - $ref: "#/components/schemas/ComputationResultsNumeric"
+                 - $ref: "#/components/schemas/ComputationResultsTreeC4"
+                 - $ref: "#/components/schemas/ComputationResultsTreeID3"
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/Error'
+
+components:
+  securitySchemes:
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: JSESSIONID
+  responses:
+    NotFound:
+      description: The specified resource was not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    BadRequest:
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    Error:
+      description: An error has occured
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+  schemas:
+    HistogramCategorical:
+      required:
+        - attributes
+      example: {
+        attributes: ["M01.060", "M01.686.508"],
+        datasources: ["HospitalA", "HospitalB"],
+        filters: {
+          operator: "OR",
+          conditions: [
+            {
+              attribute: "C14",
+              operator: "=",
+              value: "C14.280"
+            },
+            {
+              attribute: "C12",
+              operator: "=",
+              value: "C12.294"
+            },
+          ],
+
+        }
+      }
+      properties:
+        attributes:
+          description: "A list of MeSH terms, corresponding to the attributes on which this histogram will be built"
+          type: "array"
+          items:
+            type: "string"
+        datasources:
+          description: "A list of the datasources (strings) from which the histogram will be computed. If this key is left empty or not specified, all available datasources will be used."
+          type: "array"
+          items:
+            type: "string"
+        filters:
+          description: "An object containing a boolean operator and a list of filters/conditions that should be met for each data tuple considered in the secure histogram computation. If this field is left blank or not specified, all data tuples will be used for the computation."
+          type: "array"
+          items:
+            type: "object"
+            "required": [ "operator", "conditions"]
+            properties:
+              operator:
+                type: "string"
+                description: "The boolean operator (string) that will be applied between all the specified conditions that follow. One of {AND, OR, XOR}. In the case of multiple conditions, the operator is left-associative"
+                "enum": [
+                      "AND",
+                      "OR",
+                      "XOR"
+                    ]
+              conditions:
+                type: "object"
+                "required": [ "attribute", "value", "operator"]
+                description: "The list of conditions that should be met by each data tuple in the computation."
+                properties:
+                  attribute:
+                    type: "string"
+                    description: "The name of the attribute"
+                  operator:
+                    type: "string"
+                    description: "The condition’s operator. One of {>, <, =}"
+                    "enum": [
+                      ">",
+                      "<",
+                      "="
+                    ]
+                  value:
+                    type: "string"
+                    description: "The attribute’s value"
+    HistogramNumerical:
+      required:
+        - attributes
+      example: {
+        attributes: [
+          {
+            name: "Patient Age",
+            cells: "5"
+          },
+          {
+            name: "Height (cm)",
+            cells: "3"
+          }
+        ],
+        datasources: ["HospitalA", "HospitalB"],
+        filters: {
+          operator: "AND",
+          conditions: [
+            {
+              attribute: "Patient Age",
+              operator: ">",
+              value: "45"
+            },
+            {
+              attribute: "Weight (kg)",
+              operator: "<",
+              value: "90"
+            },
+          ],
+
+        }
+      }
+      properties:
+        attributes:
+          description: "A list of objects, corresponding to the attributes on which this histogram will be built."
+          type: "array"
+          items:
+            type: "object"
+            "required": [ "name", "cells"]
+            properties:
+              name:
+                type: "string"
+                description: "The name of the attribute."
+              cells:
+                type: "integer"
+                description: "The number of histogram cells to be created for this attribute."
+        datasources:
+          description: "A list of the datasources (strings) from which the histogram will be computed. If this key is left empty or not specified, all available datasources will be used."
+          type: "array"
+          items:
+            type: "string"
+        filters:
+          description: "An object containing a boolean operator and a list of filters/conditions that should be met for each data tuple considered in the secure histogram computation. If this field is left blank or not specified, all data tuples will be used for the computation."
+          type: "array"
+          items:
+            type: "object"
+            "required": [ "operator", "conditions"]
+            properties:
+              operator:
+                type: "string"
+                description: "The boolean operator (string) that will be applied between all the specified conditions that follow. One of {AND, OR, XOR}. In the case of multiple conditions, the operator is left-associative"
+                "enum": [
+                      "AND",
+                      "OR",
+                      "XOR"
+                    ]
+              conditions:
+                type: "object"
+                "required": [ "attribute", "operator", "value"]
+                description: "The list of conditions that should be met by each data tuple in the computation."
+                properties:
+                  attribute:
+                    type: "string"
+                    description: "The name of the attribute"
+                  operator:
+                    type: "string"
+                    description: "The condition’s operator. One of {>, <, =}"
+                    "enum": [
+                      ">",
+                      "<",
+                      "="
+                    ]
+                  value:
+                    type: "string"
+                    description: "The attribute’s value"
+    Dataset:
+      required:
+        - file
+        - del
+        - datatype
+        - vartypes
+        - checkColumns
+      properties:
+        file:
+          type: string
+          format: binary
+          description: The file
+        del:
+          type: string
+          description: The split delimiter
+        datatype:
+          type: string
+          description: 'The data type of the dataset: ''tabular'' or ''set'''
+        vartypes:
+          type: array
+          description: >-
+            An array with the variable types of the columns: ['int', 'double',
+            'string', 'date']
+          items:
+            type: string
+        checkColumns:
+          type: array
+          description: >-
+            A boolean array indicating which column should participate in the
+            anonymization: ['true', 'false']
+          items:
+            type: boolean
+    Error:
+      properties:
+        code:
+          type: integer
+          description: Error code
+        message:
+          type: string
+          description: Error message
+    Import:
+      required:
+      - attribute
+      properties:
+        attributes:
+          type: array
+          items:
+            type: string
+          example: ["Patient Age", "M01.060"]
+
+    Tree:
+      required:
+        - attributes
+        - class_attribute
+        - classifier
+        - dataset
+      properties:
+        attributes:
+          description: "List of training attributes."
+          type: "array"
+          items:
+            type: "object"
+            "required": [ "name", "cells"]
+            properties:
+              name:
+                type: "string"
+              cells:
+                type: "integer"
+        dataset:
+          description: "The dataset on which which the tree will be built."
+          type: "string"
+          example: "cvi"
+        classifier:
+          description: "The classification algorithm."
+          type: "string"
+          enum:
+            - "ID3"
+            - "C45"
+        datasources:
+          description: "Datasources on which the tree will be built. Optional. All datasources will be considered if left blank."
+          type: "array"
+          items:
+            type: "string"
+          example: ["HospitalA", "HospitalB"]
+      example: {"attributes":[{"name":"Height (cm)","cells":"3"},{"name":"Weight (kg)","cells":"3"}],"classifier":"ID3","class_attribute":{"name":"Patient Age","cells":"3"},"dataset":"cvi","datasources":["HospitalA","HospitalB"]}
+    StatusResponse:
+      required:
+        - status
+      description: "The status of computation"
+      type: object
+      properties:
+        status:
+          type: string
+          enum:
+            - "pending"
+            - "processing"
+            - "failed"
+            - "completed"
+
+    ComputationAccepted:
+      required:
+        - location
+      description: "Indication that the secure histogram computation has been accepted. The location provided should be used for status polling."
+      type: object
+      properties:
+        location:
+          type: string
+      example: {"location" : "/smpc/queue/b0f236f4-920b-4c11-b152-f8ae8812c42e"}
+
+    ComputationCompleted:
+      required:
+        - location
+      description: "Indication that the secure histogram computation has been completed. The location provided should be used results retrieval."
+      type: object
+      properties:
+        location:
+          type: string
+      example: {"location" : "/smpc/results/b0f236f4-920b-4c11-b152-f8ae8812c42e"}
+
+    ComputationResultsCategorical:
+      description: "The results of a numeric histogram computation."
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            type: "object"
+            properties:
+              value:
+                type: integer
+              label:
+                type: string
+          example: [
+            {
+              "value": 78,
+              "label": "Infant"
+            },
+            {
+            "value": 63,
+            "label": "Adolescent"
+            },
+            {
+            "value": 9936,
+            "label": "Adult"
+            },
+            {
+            "value": 154,
+            "label": "Child"
+            }
+          ]
+
+    ComputationResultsNumeric:
+      description: "The results of a numeric histogram computation."
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            type: "object"
+            properties:
+              value:
+                type: integer
+              label:
+                type: string
+          example: [
+            {
+              "value": 84,
+              "label": "[130.0, 144.0)"
+            },
+            {
+            "value": 314,
+            "label": "[144.0, 158.0)"
+            },
+            {
+            "value": 428,
+            "label": "[158.0, 172.0)"
+            },
+            {
+            "value": 800,
+            "label": "[172.0, 186.0)"
+            },
+            {
+            "value": 374,
+            "label": "[186.0, 200.0]"
+            }
+          ]
+
+    ComputationResultsTreeC4:
+      description: "The results of decision tree using C4.5."
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/TreeNode"
+      example: [
+        {
+          label: "Height (cm) <= 173.01",
+          children: [
+            {
+              label: "Weight (kg) > 68.56",
+              children: [
+                {label: "Heart rate > 81.50", value: "[18.00, 31.00)"},
+                {label: "Heart rate <= 81.50", value: "[70.00, 83.00)"}
+              ]
+            },
+            {
+              label: "Weight (kg) <= 68.56",
+              children: [
+                {"Heart rate > 70.50": "[31.00, 44.00)"},
+                {"Heart rate <= 70.50": "[18.00, 31.00)"}
+              ]
+            }
+          ]
+        },
+        {
+          label: "Height (cm) > 173.01",
+          children: [
+            {
+              label: "Weight (kg) > 87.70",
+              children: [
+                {label: "Heart rate > 94.00", value: "[18.00, 31.00)"},
+                {label: "Heart rate <= 94.00", value: "[31.00, 44.00)"}
+              ]
+            },
+            {
+              label: "Weight (kg) <= 87.70",
+              children: [
+                {"Heart rate <= 65.50": "[31.00, 44.00)"},
+                {"Heart rate > 65.50": "[57.00, 70.00)"}
+              ]
+            }
+          ]
+        }
+      ]
+
+    ComputationResultsTreeID3:
+      description: "The results of decision tree using ID3."
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/TreeNode"
+      example: [
+        {
+          label: "Height (cm) == [153.34, 176.67)",
+          children: [
+            {label: "Heart rate == [95.33, 123.00)", value: "[34.25, 50.50)"},
+            {label: "Heart rate == [67.67, 95.33)", value: "[18.00, 34.25)"},
+            {label: "Heart rate == [40.00, 67.67)", value: "[18.00, 34.25)"},
+          ]
+        },
+        {
+          label: "Height (cm) == [130.01, 153.34)",
+          children: [
+            {label: "Heart rate == [95.33, 123.00)", value: "[34.25, 50.50)"},
+            {label: "Heart rate == [67.67, 95.33)", value: "[34.25, 50.50)"},
+            {label: "Heart rate == [40.00, 67.67)", value: "[18.00, 34.25)"},
+          ]
+        },
+        {
+          label: "Height (cm) == [176.67, 200.00)",
+          children: [
+            {label: "Heart rate == [95.33, 123.00)", value: "[18.00, 34.25)"},
+            {label: "Heart rate == [67.67, 95.33)", value: "[34.25, 50.50)"},
+            {label: "Heart rate == [40.00, 67.67)", value: "[34.25, 50.50)"},
+          ]
+        }
+      ]
+
+    TreeNode:
+      type: object
+      properties:
+        label:
+          type: string
+        children:
+          type: array
+          items:
+            anyOf:
+             - $ref: "#/components/schemas/TreeNode"
+             - $ref: "#/components/schemas/LeefNode"
+
+    LeefNode:
+      type: object
+      properties:
+        label:
+          type: string
+        value:
+          type: string
