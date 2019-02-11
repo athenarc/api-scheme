@@ -10,7 +10,7 @@ info:
     An API for multi-level privacy preservation techniques.
   version: 0.1.0
   x-logo:
-    url: 'http://www.myhealthmydata.eu/wp-content/uploads/2016/12/logo_MHMD.png'
+    url: 'https://mhmd.madgik.di.uoa.gr/mhmd_logo_black.svg'
     altText: MHMD
   license:
     name: MIT
