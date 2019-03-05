@@ -26,6 +26,8 @@ tags:
       supports k-anonymity and k^m-anonymity
   - name: SMPC
     description: 'Secure multi party computation platform'
+  - name: Federate Learning
+    description: 'Federated learning API'
 paths:
   /smpc/import:
     post:
