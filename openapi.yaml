@@ -270,6 +270,125 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         '500':
           $ref: '#/components/responses/Error'
+  /train/context:
+    post:
+      tags:
+        - Federate Learning
+      summary: "Upload a training model."
+      description: "With the use of the route a researcher can upload a docker image which contains the model evalutation and the the gradient computation step."
+      requestBody:
+        description: The docker container image
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Model'
+      responses:
+        '202':
+          description: Request for federated learning accepted.
+          headers:
+            Location:
+              schema:
+                type: string
+              description: "Location for status polling."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TrainingAccepted"
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/Error'
+
+  /train/context/{id}:
+    get:
+      tags:
+        - Federate Learning
+      summary: "Poll for an ongoing federated learning status."
+      description: "Check the status of an ongoing training iteration. Returns its status or the location of the training's results when the training is completed."
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+          description: The request id.
+      responses:
+        '200':
+          description: ΟΚ
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StatusResponse"
+
+        '303':
+          description: Computation completed. Redirecting to the resource where the computation's results are provided.
+          headers:
+            Location:
+              schema:
+                type: string
+              description: "Location for computartion results retrieval"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TrainingCompleted"
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/Error'
+
+  /train/context/{id}/compute:
+    post:
+      tags:
+        - Federate Learning
+      summary: "Initiate a training iteration."
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+          description: The request id.
+      requestBody:
+        description: The file containing the new parameters for the training.
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/File'
+      responses:
+        '200':
+          description: Request for federated learning accepted.
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/Error'
+    delete:
+      tags:
+        - Federate Learning
+      summary: "Delete a training."
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+          description: The request id.
+      responses:
+        '200':
+          description: ΟΚ
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StatusResponse"
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/Error'
 
 components:
   securitySchemes:
@@ -311,6 +430,24 @@ components:
           type: string
           format: binary
           description: The file
+    Model:
+      required:
+        - file
+      properties:
+        file:
+          type: string
+          format: binary
+          description: The file.
+        study_id:
+          type: string
+          description: The mhmd study id.
+        batch_size:
+          type: integer
+          description: The number of data samples are used in batch for learning.
+        parameter_count:
+          type: integer
+          description: The total number of model's parameters.
+
     Algorithm:
         required:
           - k
@@ -594,6 +731,16 @@ components:
           type: string
       example: {"location" : "/smpc/queue/b0f236f4-920b-4c11-b152-f8ae8812c42e"}
 
+    TrainingAccepted:
+      required:
+        - location
+      description: "Indication that the request for federated learning has been accepted. The location provided should be used for status polling."
+      type: object
+      properties:
+        location:
+          type: string
+      example: {"location" : "/train/queue/b0f236f4-920b-4c11-b152-f8ae8812c42e"}
+
     ComputationCompleted:
       required:
         - location
@@ -603,6 +750,16 @@ components:
         location:
           type: string
       example: {"location" : "/smpc/results/b0f236f4-920b-4c11-b152-f8ae8812c42e"}
+
+    TrainingCompleted:
+      required:
+        - location
+      description: "Indication that the training iteration has been completed."
+      type: object
+      properties:
+        location:
+          type: string
+      example: {"location" : "/training/results/b0f236f4-920b-4c11-b152-f8ae8812c42e"}
 
     ComputationResultsCategorical:
       description: "The results of a numeric histogram computation."
