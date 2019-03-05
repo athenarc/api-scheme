@@ -227,7 +227,7 @@ paths:
         content:
           multipart/form-data:
             schema:
-              $ref: '#/components/schemas/Hierarchy'
+              $ref: '#/components/schemas/File'
       responses:
         '200':
           description: File uploaded successfully.
@@ -303,7 +303,7 @@ components:
           schema:
             $ref: '#/components/schemas/Error'
   schemas:
-    Hierarchy:
+    File:
       required:
         - file
       properties:
