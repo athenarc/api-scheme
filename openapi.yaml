@@ -103,34 +103,7 @@ paths:
           $ref: '#/components/responses/BadRequest'
         '500':
           $ref: '#/components/responses/Error'
-  /smpc/decision_tree/:
-    post:
-      tags:
-        - SMPC
-      summary: Build a decision tree on selected attributes.
-      description: "Train a decision tree classifier on specific test and target attributes."
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/Tree"
-      responses:
-        '202':
-          description: Request for smpc computation accepted.
-          headers:
-            Location:
-              schema:
-                type: string
-              description: "Location for status polling."
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ComputationAccepted"
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '500':
-          $ref: '#/components/responses/Error'
+
   /smpc/queue/{id}:
     get:
       tags:
@@ -190,8 +163,6 @@ paths:
                 oneOf:
                  - $ref: "#/components/schemas/ComputationResultsCategorical"
                  - $ref: "#/components/schemas/ComputationResultsNumeric"
-                 - $ref: "#/components/schemas/ComputationResultsTreeC4"
-                 - $ref: "#/components/schemas/ComputationResultsTreeID3"
         '404':
           $ref: '#/components/responses/NotFound'
         '500':
@@ -698,107 +669,3 @@ components:
             "label": "[186.0, 200.0]"
             }
           ]
-
-    ComputationResultsTreeC4:
-      description: "The results of decision tree using C4.5."
-      type: object
-      properties:
-        data:
-          type: array
-          items:
-            $ref: "#/components/schemas/TreeNode"
-      example: [
-        {
-          label: "Height (cm) <= 173.01",
-          children: [
-            {
-              label: "Weight (kg) > 68.56",
-              children: [
-                {label: "Heart rate > 81.50", value: "[18.00, 31.00)"},
-                {label: "Heart rate <= 81.50", value: "[70.00, 83.00)"}
-              ]
-            },
-            {
-              label: "Weight (kg) <= 68.56",
-              children: [
-                {"Heart rate > 70.50": "[31.00, 44.00)"},
-                {"Heart rate <= 70.50": "[18.00, 31.00)"}
-              ]
-            }
-          ]
-        },
-        {
-          label: "Height (cm) > 173.01",
-          children: [
-            {
-              label: "Weight (kg) > 87.70",
-              children: [
-                {label: "Heart rate > 94.00", value: "[18.00, 31.00)"},
-                {label: "Heart rate <= 94.00", value: "[31.00, 44.00)"}
-              ]
-            },
-            {
-              label: "Weight (kg) <= 87.70",
-              children: [
-                {"Heart rate <= 65.50": "[31.00, 44.00)"},
-                {"Heart rate > 65.50": "[57.00, 70.00)"}
-              ]
-            }
-          ]
-        }
-      ]
-
-    ComputationResultsTreeID3:
-      description: "The results of decision tree using ID3."
-      type: object
-      properties:
-        data:
-          type: array
-          items:
-            $ref: "#/components/schemas/TreeNode"
-      example: [
-        {
-          label: "Height (cm) == [153.34, 176.67)",
-          children: [
-            {label: "Heart rate == [95.33, 123.00)", value: "[34.25, 50.50)"},
-            {label: "Heart rate == [67.67, 95.33)", value: "[18.00, 34.25)"},
-            {label: "Heart rate == [40.00, 67.67)", value: "[18.00, 34.25)"},
-          ]
-        },
-        {
-          label: "Height (cm) == [130.01, 153.34)",
-          children: [
-            {label: "Heart rate == [95.33, 123.00)", value: "[34.25, 50.50)"},
-            {label: "Heart rate == [67.67, 95.33)", value: "[34.25, 50.50)"},
-            {label: "Heart rate == [40.00, 67.67)", value: "[18.00, 34.25)"},
-          ]
-        },
-        {
-          label: "Height (cm) == [176.67, 200.00)",
-          children: [
-            {label: "Heart rate == [95.33, 123.00)", value: "[18.00, 34.25)"},
-            {label: "Heart rate == [67.67, 95.33)", value: "[34.25, 50.50)"},
-            {label: "Heart rate == [40.00, 67.67)", value: "[34.25, 50.50)"},
-          ]
-        }
-      ]
-
-    TreeNode:
-      type: object
-      properties:
-        label:
-          type: string
-        children:
-          type: array
-          items:
-            anyOf:
-             - $ref: "#/components/schemas/TreeNode"
-             - $ref: "#/components/schemas/LeefNode"
-
-    LeefNode:
-      type: object
-      properties:
-        label:
-          type: string
-        value:
-          type: string
