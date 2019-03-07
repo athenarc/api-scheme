@@ -355,7 +355,7 @@ paths:
         content:
           multipart/form-data:
             schema:
-              $ref: '#/components/schemas/File'
+              $ref: '#/components/schemas/TrainingCompute'
       responses:
         '200':
           description: Request for federated learning accepted.
@@ -469,6 +469,20 @@ components:
             description: An array with the name of each hierarchy. (Only the quasi-identifiers. The others identifiers are empty)
             items:
               type: string
+
+    TrainingCompute:
+      required:
+          - file
+      properties:
+        file:
+          type: string
+          format: binary
+          description: The file
+        result_callback_url:
+          type: string
+          description: The callback URL where the results of the iteration will be posted.
+
+
     HistogramCategorical:
       required:
         - attributes
