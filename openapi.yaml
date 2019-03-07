@@ -26,7 +26,7 @@ tags:
       supports k-anonymity and k^m-anonymity
   - name: SMPC
     description: 'Secure multi party computation platform'
-  - name: Federate Learning
+  - name: Federated Learning
     description: 'Federated learning API'
 paths:
   /smpc/import:
@@ -273,7 +273,7 @@ paths:
   /train/context:
     post:
       tags:
-        - Federate Learning
+        - Federated Learning
       summary: "Upload a training model."
       description: "With the use of the route a researcher can upload a docker image which contains the model evalutation and the the gradient computation step."
       requestBody:
@@ -303,7 +303,7 @@ paths:
   /train/context/{id}:
     get:
       tags:
-        - Federate Learning
+        - Federated Learning
       summary: "Poll for an ongoing federated learning status."
       description: "Check the status of an ongoing training iteration. Returns its status or the location of the training's results when the training is completed."
       parameters:
@@ -340,7 +340,7 @@ paths:
   /train/context/{id}/compute:
     post:
       tags:
-        - Federate Learning
+        - Federated Learning
       summary: "Initiate a training iteration."
       parameters:
         - in: path
@@ -369,7 +369,7 @@ paths:
           $ref: '#/components/responses/Error'
     delete:
       tags:
-        - Federate Learning
+        - Federated Learning
       summary: "Delete a training."
       parameters:
         - in: path
