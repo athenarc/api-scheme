@@ -406,7 +406,7 @@ components:
           description: The mhmd study id.
         batch_size:
           type: integer
-          description: The number of data samples are used in batch for learning.
+          description: The number of data samples used in batch for learning.
         parameter_count:
           type: integer
           description: The total number of model's parameters.
@@ -436,11 +436,12 @@ components:
     TrainingCompute:
       required:
           - file
+          - result_callback_url
       properties:
         file:
           type: string
           format: binary
-          description: The file
+          description: The file containing the parameters
         result_callback_url:
           type: string
           description: The callback URL where the results of the iteration will be posted.
