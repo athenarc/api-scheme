@@ -305,6 +305,7 @@ paths:
       tags:
         - Federated Learning
       summary: "Initiate a training computation."
+      description: "There can only be one active training. If a request is made when another computation is still active the last computation is deleted and overwritten by the new one."
       parameters:
         - in: path
           name: id
@@ -330,6 +331,8 @@ paths:
           $ref: '#/components/responses/BadRequest'
         '500':
           $ref: '#/components/responses/Error'
+
+  /train/context/{id}:
     delete:
       tags:
         - Federated Learning
