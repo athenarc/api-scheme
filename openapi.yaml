@@ -34,7 +34,7 @@ paths:
       tags:
       - SMPC
       summary: Securely import data into the SMPC Platform.
-      description: "Import a specified attribute into the SMPC cluster. This API call is used internally and is not for external used."
+      description: "Import a specified attribute into the SMPC cluster. This API call is used internally and is not for external use."
       requestBody:
         description: The attributes of the data that they will be imported.
         required: true
