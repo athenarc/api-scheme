@@ -8,7 +8,7 @@ info:
   title: Athena MHMD API
   description: >-
     An API for multi-level privacy preservation techniques.
-  version: 0.1.0
+  version: 0.2.0
   x-logo:
     url: 'https://mhmd.madgik.di.uoa.gr/mhmd_logo_black.svg'
     altText: MHMD
@@ -524,6 +524,20 @@ components:
         message:
           type: string
           description: Error message
+
+    StatusResponse:
+      required:
+        - status
+      description: "The status of computation"
+      type: object
+      properties:
+        status:
+          type: string
+          enum:
+            - "pending"
+            - "processing"
+            - "failed"
+            - "completed"
 
     ComputationAccepted:
       required:
