@@ -33,8 +33,8 @@ paths:
     post:
       tags:
         - SMPC
-      summary: Initiates a secure computation for numerical/continuous values dataset.
-      description: "Through the request's body, one can specify all the desired properties of the histograms to be computed. These include the attributes on which the histogram will be built (names and cell), the dataproviders from which data will be used, and a set of filters/conditions that should hold for each data tuple taken into consideration when building the histogram. You can provide up to two attributes as up to 2 dimensions histograms are suported by the smpc computation engine."
+      summary: Initiates a secure computation over a numerical dataset.
+      description: "Through the request's body, one can specify all the desired properties of the histograms to be computed. These include the names of the attributes, the ids of the dataproviders to be cosidered, a set of filters that needs to be satisfied by data instances to be taken into account and finally, for numerical attributes, the number of bins (cells) to be used. You can provide up to two attributes as up to 2 dimensions histograms are suported by the smpc computation engine."
       requestBody:
         required: true
         content:
