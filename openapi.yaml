@@ -430,7 +430,7 @@ components:
           }
         ],
         algorithm: "2d_numerical_histogram",
-        data-providers: ["data-provider-1", "data-provider-2"],
+        dataProviders: [0, 2],
         filters: [
           {
             attribute: "Patient Age",
@@ -462,8 +462,8 @@ components:
           type: "string"
           description: "The histogram algorithm."
           enum: ["2d_mixed_histogram", "1d_categorical_histogram", "2d_numerical_histogram", "2d_categorical_histogram"]
-        datasources:
-          description: "A list of the dataproviders (strings) from which the histogram will be computed. If this key is left empty or not specified, all available datasources will be used."
+        dataProviders:
+          description: "A list of the data providers (integers) from which the histogram will be computed. If this key is left empty or not specified, all available data providers will be used."
           type: "array"
           items:
             type: "string"
@@ -595,10 +595,10 @@ components:
                 type: "string"
               cells:
                 type: "integer"
-        datasources:
+        dataProviders:
           type: "array"
           items:
-            type: "string"
+            type: "integer"
         filters:
           type: "array"
           items:
