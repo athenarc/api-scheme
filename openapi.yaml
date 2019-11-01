@@ -443,17 +443,37 @@ components:
           description: The file
     TrainingModel:
       required:
-        - file
+        - docker_image
+        - parameter_count
+        - max_iterations
+        - data_split
+      example: {
+        docker_image: "hello-world",
+        parameter_count: 10000,
+        dataProviders: [0, 1],
+        data_split: [0.3, 0.2],
+        max_iterations: 100
+      }
       properties:
         docker_image:
           type: string
           description: The docker image url. Can be either url pointing to a tar file or a docker repository image url.
-        batch_size:
-          type: integer
-          description: The number of data samples used in batch for learning.
         parameter_count:
           type: integer
           description: The total number of model's parameters.
+        dataProviders:
+          description: "A list of the data providers (integers) that will participate in the training. If this key is left empty or not specified, all available data providers will be used."
+          type: "array"
+          items:
+            type: "string"
+        data_split:
+          description: "An array of size two. The first element of the array denotes the validation percentage and the second element denotes the test percentage"
+          type: "array"
+          items:
+            type: "number"
+        max_iterations:
+          type: integer
+          description: The max number of iterations.
 
     Algorithm:
         required:
@@ -479,16 +499,23 @@ components:
 
     TrainingCompute:
       required:
-          - file
+          - batch_size
+          - parameters_file_url
           - result_callback_url
       properties:
-        file:
-          type: string
-          format: binary
-          description: The file containing the parameters
+        batch_size:
+          type: integer
+          description: The size of the batch.
+        parameters_file_url:
+          type: "string"
+          description: The url from where the parameters will be downloaded. For example an h5p file.
         result_callback_url:
           type: string
           description: The callback URL where the results of the iteration will be posted.
+        validation:
+          type: string
+          description: "Can be test or validation"
+          "enum": ["test", "validation"]
 
     Histogram:
       required:
