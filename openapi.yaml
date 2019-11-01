@@ -338,8 +338,8 @@ paths:
     post:
       tags:
         - Federated Learning
-      summary: "Initiate a training computation."
-      description: "There can only be one active training. If a request is made when another computation is still active the last computation is deleted and overwritten by the new one."
+      summary: "Initiate an iteration of training."
+      description: ""
       parameters:
         - in: path
           name: id
