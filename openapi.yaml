@@ -304,7 +304,7 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         '500':
           $ref: '#/components/responses/Error'
-  /train/context:
+  /fl/train/context:
     post:
       tags:
         - Federated Learning
@@ -334,7 +334,7 @@ paths:
         '500':
           $ref: '#/components/responses/Error'
 
-  /train/context/{id}/compute:
+  /fl/train/context/{id}/compute:
     post:
       tags:
         - Federated Learning
@@ -366,7 +366,7 @@ paths:
         '500':
           $ref: '#/components/responses/Error'
 
-  /train/context/{id}:
+  /fl/train/context/{id}:
     delete:
       tags:
         - Federated Learning
