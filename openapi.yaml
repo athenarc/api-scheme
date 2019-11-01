@@ -509,7 +509,7 @@ components:
           description: The size of the batch.
         parameters_file_url:
           type: "string"
-          description: The url from where the parameters will be downloaded. For example an h5p file.
+          description: The url from where the parameters will be downloaded. The url should return an h5p file.
         result_callback_url:
           type: string
           description: The callback URL where the results of the iteration will be posted.
