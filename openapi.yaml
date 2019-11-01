@@ -308,7 +308,7 @@ paths:
     post:
       tags:
         - Federated Learning
-      summary: "Upload a training model."
+      summary: "Initiate the deployment of a training model."
       description: "A researcher can upload a docker image which contains the model evalutation and the gradient computation step."
       requestBody:
         description: The docker image along with additional fields required for the training.
@@ -316,7 +316,7 @@ paths:
         content:
           multipart/form-data:
             schema:
-              $ref: '#/components/schemas/Model'
+              $ref: '#/components/schemas/TrainingModel'
       responses:
         '202':
           description: Request for federated learning accepted.
@@ -328,7 +328,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/TrainingAccepted"
+                $ref: "#/components/schemas/ComputationAccepted"
         '400':
           $ref: '#/components/responses/BadRequest'
         '500':
@@ -370,7 +370,7 @@ paths:
     delete:
       tags:
         - Federated Learning
-      summary: "Delete a training."
+      summary: "Delete a training context"
       parameters:
         - in: path
           name: id
@@ -441,17 +441,13 @@ components:
           type: string
           format: binary
           description: The file
-    Model:
+    TrainingModel:
       required:
         - file
       properties:
-        file:
+        docker_image:
           type: string
-          format: binary
-          description: The file.
-        study_id:
-          type: string
-          description: The mhmd study id.
+          description: The docker image url. Can be either url pointing to a tar file or a docker repository image url.
         batch_size:
           type: integer
           description: The number of data samples used in batch for learning.
