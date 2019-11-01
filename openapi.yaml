@@ -658,10 +658,13 @@ components:
 
     ComputationAccepted:
       required:
+        - id
         - location
       description: "Indication that the computation has been accepted. The location provided should be used for status polling."
       type: object
       properties:
+        id:
+          type: string
         location:
           type: string
       example: {"id": "b0f236f4-920b-4c11-b152-f8ae8812c42e", "location" : "/queue/b0f236f4-920b-4c11-b152-f8ae8812c42e"}
