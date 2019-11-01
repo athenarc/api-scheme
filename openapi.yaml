@@ -355,6 +355,17 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/Error'
+    Cache:
+      description: Computation found in cache. Redirect to the resource where the computation's results are provided.
+      headers:
+        Location:
+          schema:
+            type: string
+          description: "Location for computartion results retrieval."
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ComputationCompleted"
   schemas:
     File:
       required:
