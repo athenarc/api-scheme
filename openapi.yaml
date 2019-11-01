@@ -314,7 +314,7 @@ paths:
         description: The docker image along with additional fields required for the training.
         required: true
         content:
-          multipart/form-data:
+          application/json:
             schema:
               $ref: '#/components/schemas/TrainingModel'
       responses:
@@ -351,7 +351,7 @@ paths:
         description: The file containing the new parameters for the training and the researcher's callback url.
         required: true
         content:
-          multipart/form-data:
+          application/json:
             schema:
               $ref: '#/components/schemas/TrainingCompute'
       responses:
