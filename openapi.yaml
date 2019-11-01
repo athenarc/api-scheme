@@ -502,6 +502,7 @@ components:
           - batch_size
           - parameters_file_url
           - result_callback_url
+          - truncation_parameter
       properties:
         batch_size:
           type: integer
@@ -512,6 +513,9 @@ components:
         result_callback_url:
           type: string
           description: The callback URL where the results of the iteration will be posted.
+        truncation_parameter:
+          type: number
+          description: The truncation parameter.
         validation:
           type: string
           description: "Can be test or validation"
