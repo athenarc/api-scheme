@@ -54,7 +54,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ComputationAccepted"
+                $ref: "#/components/schemas/SMPCComputationAccepted"
         '303':
           description: Computation found in cache. Redirect to the resource where the computation's results are provided.
           headers:
@@ -65,7 +65,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ComputationCompleted"
+                $ref: "#/components/schemas/SMPCComputationCompleted"
         '400':
           $ref: '#/components/responses/BadRequest'
         '500':
@@ -102,7 +102,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ComputationCompleted"
+                $ref: "#/components/schemas/SMPCComputationCompleted"
         '404':
           $ref: '#/components/responses/NotFound'
         '500':
@@ -557,7 +557,7 @@ components:
             - "failed"
             - "completed"
 
-    ComputationAccepted:
+    SMPCComputationAccepted:
       required:
         - location
       description: "Indication that the secure histogram computation has been accepted. The location provided should be used for status polling."
@@ -567,35 +567,35 @@ components:
           type: string
       example: {"location" : "/smpc/queue/b0f236f4-920b-4c11-b152-f8ae8812c42e"}
 
-    TrainingAccepted:
+    ComputationAccepted:
       required:
         - location
-      description: "Indication that the request for federated learning has been accepted. The location provided can be used to initiate an iteration"
+      description: "Indication that the computation has been accepted. The location provided should be used for status polling."
       type: object
       properties:
         location:
           type: string
-      example: {"location" : "/train/compute/b0f236f4-920b-4c11-b152-f8ae8812c42e"}
+      example: {"id": "b0f236f4-920b-4c11-b152-f8ae8812c42e", "location" : "/queue/b0f236f4-920b-4c11-b152-f8ae8812c42e"}
 
-    ComputationCompleted:
+    SMPCComputationCompleted:
       required:
         - location
-      description: "Indication that the secure histogram computation has been completed. The location provided should be used results retrieval."
+      description: "Indication that a secure computation has been completed. The location provided should be used results retrieval."
       type: object
       properties:
         location:
           type: string
       example: {"location" : "/smpc/results/b0f236f4-920b-4c11-b152-f8ae8812c42e"}
 
-    TrainingCompleted:
+    ComputationCompleted:
       required:
         - location
-      description: "Indication that the training iteration has been completed."
+      description: "Indication that a computation has been completed. The location provided should be used results retrieval."
       type: object
       properties:
         location:
           type: string
-      example: {"location" : "/training/results/b0f236f4-920b-4c11-b152-f8ae8812c42e"}
+      example: {"id": "b0f236f4-920b-4c11-b152-f8ae8812c42e", "location" : "/results/b0f236f4-920b-4c11-b152-f8ae8812c42e"}
 
     ComputaitonResults:
       properties:
