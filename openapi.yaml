@@ -31,6 +31,72 @@ tags:
   - name: Federated Learning
     description: 'Federated learning API'
 paths:
+  /queue/{id}:
+    get:
+      tags:
+        - Queue & Results
+      summary: "Poll for an ongoing computation status."
+      description: "Check the status of an ongoing computation. Returns its status or the location of the computation's results when the computation is completed."
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+          description: The request id.
+      responses:
+        '200':
+          description: ΟΚ
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StatusResponse"
+
+        '303':
+          description: Computation completed. Redirect to the resource where the computation's results are provided.
+          headers:
+            Location:
+              schema:
+                type: string
+              description: "Location for computartion results retrieval"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ComputationCompleted"
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/Error'
+
+  /results/{id}:
+    get:
+      tags:
+        - Queue & Results
+      summary: "Computation results retrieval"
+      description: "Retrieve the results of a completed computation."
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+          description: The request id.
+      responses:
+        '200':
+          description: ΟΚ
+          content:
+            application/json:
+              schema:
+                oneOf:
+                 - $ref: "#/components/schemas/ComputationResults1DCategorical"
+                 - $ref: "#/components/schemas/ComputationResults1DNumerical"
+                 - $ref: "#/components/schemas/ComputationResults2DCategorical"
+                 - $ref: "#/components/schemas/ComputationResults2DNumerical"
+                 - $ref: "#/components/schemas/ComputationResults2DMixed"
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/Error'
   /smpc/histogram/:
     post:
       tags:
